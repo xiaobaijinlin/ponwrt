@@ -4,6 +4,16 @@ English | [简体中文](README_zh.md)
 
 PonWrt is based on [ImmortalWrt](https://github.com/immortalwrt/immortalwrt) and adds support for Airoha AN7581 and AN7583 PON devices.
 
+## ⚠️ Disclaimer
+
+PonWrt is an open-source firmware project intended for research and development.
+
+Flashing firmware or modifying PON-related settings involves risks and may result in boot failure, loss of configuration or device-specific data, or failure to register with the PON network. Please back up the original firmware and device data before making any changes.
+
+Users are responsible for ensuring that their use complies with applicable laws, regulations, and network operator requirements. Do not use this project for unauthorized network access, impersonating or cloning another device's identity, or interfering with operator networks.
+
+The authors and contributors are not responsible for device damage, network service disruption, or other consequences resulting from flashing, configuring, or using this project.
+
 ## Supported devices
 
 | SoC | Device | Profile | Stock calibration / identity data |
@@ -22,14 +32,41 @@ PonWrt is based on [ImmortalWrt](https://github.com/immortalwrt/immortalwrt) and
 ## Build
 
 ```sh
+#  Install the required toolchain and libraries for building
+sudo apt update -y
+sudo apt full-upgrade -y
+sudo apt install -y ack antlr3 asciidoc autoconf automake autopoint binutils bison build-essential \
+  bzip2 ccache clang cmake cpio curl device-tree-compiler ecj fastjar flex gawk gettext gcc-multilib \
+  g++-multilib git gnutls-dev gperf haveged help2man intltool lib32gcc-s1 libc6-dev-i386 libelf-dev \
+  libglib2.0-dev libgmp3-dev libltdl-dev libmpc-dev libmpfr-dev libncurses-dev libpython3-dev \
+  libreadline-dev libssl-dev libtool libyaml-dev libz-dev lld llvm lrzsz mkisofs msmtp nano \
+  ninja-build p7zip p7zip-full patch pkgconf python3 python3-pip python3-ply python3-docutils \
+  python3-pyelftools qemu-utils re2c rsync scons squashfs-tools subversion swig texinfo uglifyjs \
+  upx-ucl unzip vim wget xmlto xxd zlib1g-dev zstd
+
+#  Or use the ImmortalWrt one-click script to install dependencies
+sudo bash -c 'bash <(curl -s https://build-scripts.immortalwrt.org/init_build_environment.sh)'
+
+
+#  Clone the source code
 git clone https://github.com/pbs05/ponwrt.git
 cd ponwrt
 
+
+#  Update and install feeds (package sources)
 ./scripts/feeds update -a
 ./scripts/feeds install -a
 
+
+#  Select a configuration, using 7581 as an example
 cp configs/an7581.config .config
-# Use configs/an7583.config for AN7583.
+#  If the target is AN7583, use the following line instead:
+cp configs/an7583.config .config
+
+
+
+#  Start building
+# -j$(nproc) means compiling in parallel with all CPU cores to speed things up
 make defconfig
 make -j$(nproc)
 ```
@@ -41,5 +78,3 @@ Images are written to `bin/targets/airoha/an7581/` or `bin/targets/airoha/an7583
 Use [AN758x-Stock2UBI](https://github.com/pbs05/an758x-stock2ubi) to back up the stock flash and install the UBI layout. Boot images and Web recovery are provided by [AN758x U-Boot](https://github.com/pbs05/uboot-an758x).
 
 After installing PonWrt, restore the stock calibration and identity data through U-Boot Web or **Network → PON → Configuration → PON board data** in LuCI. Convert FiberHome `factory` backups with [FiberHome Factory](https://github.com/pbs05/fiberhome-factory) first. Restore converted FiberHome data, `reservearea`, or `dsd` backups to the PonWrt `factory` volume. Nokia `bosa` and `ri` backups use volumes with the same names.
-
-Official QQ group: 1020152066
